@@ -1,7 +1,7 @@
 {
   "name": "stand_alone_pets",
   "productName": "Stand_Alone_Pets",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {

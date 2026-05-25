@@ -8,10 +8,21 @@ on:
 permissions:
   contents: write
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   macos:
     name: Build macOS
-    runs-on: macos-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-13
+            arch: x64
+          - os: macos-14
+            arch: arm64
 
     steps:
       - name: Checkout
@@ -30,7 +41,7 @@ jobs:
         run: npm test
 
       - name: Build macOS packages
-        run: npm run dist:mac -- --x64 --arm64
+        run: npm run dist:mac -- --${{ matrix.arch }}
 
       - name: Upload release assets
         uses: softprops/action-gh-release@v2
