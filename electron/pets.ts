@@ -48,6 +48,11 @@ function isPetManifest(value: unknown): value is PetManifest {
   );
 }
 
+function isPathInside(parentPath: string, childPath: string): boolean {
+  const relative = path.relative(parentPath, childPath);
+  return relative.length > 0 && !relative.startsWith("..") && !path.isAbsolute(relative);
+}
+
 export function discoverPets(petsDir = getCodexPetsDir()): PetRegistryResult {
   const assetMap = new Map<string, string>();
   const discovered: PetDescriptor[] = [];
@@ -70,7 +75,7 @@ export function discoverPets(petsDir = getCodexPetsDir()): PetRegistryResult {
       }
 
       const spritesheetPath = path.resolve(folderPath, parsed.spritesheetPath);
-      if (!spritesheetPath.startsWith(folderPath) || !fs.existsSync(spritesheetPath)) {
+      if (!isPathInside(folderPath, spritesheetPath) || !fs.existsSync(spritesheetPath)) {
         continue;
       }
 
@@ -91,4 +96,3 @@ export function discoverPets(petsDir = getCodexPetsDir()): PetRegistryResult {
   discovered.sort((a, b) => a.displayName.localeCompare(b.displayName));
   return { pets: [builtInPet, ...discovered], assetMap };
 }
-

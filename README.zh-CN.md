@@ -94,7 +94,7 @@ macOS 包默认使用 ad-hoc 签名。除非后续在发布流程里配置 Apple
 - 模型，例如 `gpt-4.1-mini`
 - 系统 Prompt
 
-API Key 会保存在 Electron 的本地用户数据目录里，不会保存在这个仓库中。应用日志只会打印是否已经配置 API Key，不会打印 API Key 本身。
+API Key 会保存在 Electron 的本地用户数据目录里，不会保存在这个仓库中。当 Electron `safeStorage` 可用时，API Key 会先加密再写入磁盘。应用日志只会打印是否已经配置 API Key，不会打印 API Key 本身。
 
 发送给模型的请求会自动带上当前宠物身份：
 

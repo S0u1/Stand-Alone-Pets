@@ -13,6 +13,16 @@ export interface AppSettings {
   petSize: number;
 }
 
+export interface SecretCodec {
+  canEncrypt(): boolean;
+  encrypt(value: string): string;
+  decrypt(value: string): string;
+}
+
+type StoredSettings = Partial<AppSettings> & {
+  apiKeyEncrypted?: string;
+};
+
 export const defaultSettings: AppSettings = {
   apiKey: "",
   baseURL: "https://api.openai.com/v1",
@@ -25,15 +35,29 @@ export const defaultSettings: AppSettings = {
   petSize: 112,
 };
 
+function sanitizeBaseURL(value: unknown): string {
+  if (typeof value !== "string" || value.trim().length === 0) {
+    return defaultSettings.baseURL;
+  }
+
+  try {
+    const parsed = new URL(value.trim());
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+      return defaultSettings.baseURL;
+    }
+
+    return parsed.toString().replace(/\/+$/, "");
+  } catch {
+    return defaultSettings.baseURL;
+  }
+}
+
 export function sanitizeSettings(input: Partial<AppSettings> = {}): AppSettings {
   const petSize = Number(input.petSize);
 
   return {
     apiKey: typeof input.apiKey === "string" ? input.apiKey : defaultSettings.apiKey,
-    baseURL:
-      typeof input.baseURL === "string" && input.baseURL.trim().length > 0
-        ? input.baseURL.trim().replace(/\/+$/, "")
-        : defaultSettings.baseURL,
+    baseURL: sanitizeBaseURL(input.baseURL),
     model:
       typeof input.model === "string" && input.model.trim().length > 0
         ? input.model.trim()
@@ -78,15 +102,21 @@ export function buildPetSystemPrompt(
 
 export class JsonConfigStore {
   private readonly filePath: string;
+  private readonly secretCodec: SecretCodec | null;
 
-  constructor(userDataPath: string) {
+  constructor(userDataPath: string, secretCodec: SecretCodec | null = null) {
     this.filePath = path.join(userDataPath, "settings.json");
+    this.secretCodec = secretCodec;
   }
 
   get(): AppSettings {
     try {
       const raw = fs.readFileSync(this.filePath, "utf8");
-      return sanitizeSettings(JSON.parse(raw) as Partial<AppSettings>);
+      const parsed = JSON.parse(raw) as StoredSettings;
+      return sanitizeSettings({
+        ...parsed,
+        apiKey: this.readApiKey(parsed),
+      });
     } catch {
       return defaultSettings;
     }
@@ -94,8 +124,36 @@ export class JsonConfigStore {
 
   set(settings: Partial<AppSettings>): AppSettings {
     const next = sanitizeSettings({ ...this.get(), ...settings });
+    const stored = this.prepareStoredSettings(next);
     fs.mkdirSync(path.dirname(this.filePath), { recursive: true });
-    fs.writeFileSync(this.filePath, JSON.stringify(next, null, 2));
+    fs.writeFileSync(this.filePath, JSON.stringify(stored, null, 2));
     return next;
+  }
+
+  private readApiKey(settings: StoredSettings): string {
+    if (
+      settings.apiKeyEncrypted &&
+      this.secretCodec?.canEncrypt()
+    ) {
+      try {
+        return this.secretCodec.decrypt(settings.apiKeyEncrypted);
+      } catch {
+        return "";
+      }
+    }
+
+    return typeof settings.apiKey === "string" ? settings.apiKey : "";
+  }
+
+  private prepareStoredSettings(settings: AppSettings): StoredSettings {
+    if (settings.apiKey.length === 0 || !this.secretCodec?.canEncrypt()) {
+      return settings;
+    }
+
+    return {
+      ...settings,
+      apiKey: "",
+      apiKeyEncrypted: this.secretCodec.encrypt(settings.apiKey),
+    };
   }
 }

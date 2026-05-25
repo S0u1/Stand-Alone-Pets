@@ -1,7 +1,7 @@
-import { app, BrowserWindow, ipcMain, Menu, nativeImage, net, protocol, Tray } from "electron";
+import { app, BrowserWindow, ipcMain, Menu, nativeImage, net, protocol, safeStorage, Tray } from "electron";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { buildPetSystemPrompt, JsonConfigStore, sanitizeSettings } from "./config";
+import { buildPetSystemPrompt, JsonConfigStore, sanitizeSettings, type SecretCodec } from "./config";
 import { builtInPet, discoverPets } from "./pets";
 import { streamChatCompletion, type ChatMessage } from "./llm";
 
@@ -36,6 +36,14 @@ function getAppIconPath(): string {
   return path.join(__dirname, "../assets/stand-alone-pets-icon.png");
 }
 
+function createSecretCodec(): SecretCodec {
+  return {
+    canEncrypt: () => safeStorage.isEncryptionAvailable(),
+    encrypt: (value) => safeStorage.encryptString(value).toString("base64"),
+    decrypt: (value) => safeStorage.decryptString(Buffer.from(value, "base64")),
+  };
+}
+
 function applyWindowInteraction(settings = configStore.get()): void {
   if (!mainWindow || mainWindow.isDestroyed()) {
     return;
@@ -66,7 +74,7 @@ function createWindow(): BrowserWindow {
       preload: getPreloadPath(),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false,
+      sandbox: true,
     },
   });
 
@@ -256,7 +264,7 @@ app.whenReady().then(() => {
   if (process.platform === "darwin") {
     app.dock?.setIcon(getAppIconPath());
   }
-  configStore = new JsonConfigStore(app.getPath("userData"));
+  configStore = new JsonConfigStore(app.getPath("userData"), createSecretCodec());
   registerPetAssetProtocol();
   registerIpcHandlers();
   petAssetMap = discoverPets().assetMap;

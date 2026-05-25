@@ -94,7 +94,7 @@ Open the app settings from the pet's right-click menu and configure:
 - Model, for example `gpt-4.1-mini`
 - System prompt
 
-The API key is stored in the app's local Electron user data directory, not in this repository. The app logs whether an API key is configured, but it does not print the key itself.
+The API key is stored in the app's local Electron user data directory, not in this repository. When Electron `safeStorage` is available, the key is encrypted before being written to disk. The app logs whether an API key is configured, but it does not print the key itself.
 
 The request sent to the model automatically prepends the current pet identity:
 
