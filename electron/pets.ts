@@ -35,6 +35,14 @@ function getCodexPetsDir(): string {
   return path.join(codexHome, "pets");
 }
 
+function getBundledPetsDir(): string {
+  return path.join(__dirname, "../pets");
+}
+
+function getDefaultPetDirs(): string[] {
+  return [getCodexPetsDir(), getBundledPetsDir()];
+}
+
 function isPetManifest(value: unknown): value is PetManifest {
   if (value == null || typeof value !== "object") {
     return false;
@@ -53,44 +61,53 @@ function isPathInside(parentPath: string, childPath: string): boolean {
   return relative.length > 0 && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
 
-export function discoverPets(petsDir = getCodexPetsDir()): PetRegistryResult {
+export function discoverPets(petsDirs: string | string[] = getDefaultPetDirs()): PetRegistryResult {
   const assetMap = new Map<string, string>();
   const discovered: PetDescriptor[] = [];
+  const seenIds = new Set<string>();
+  const dirs = Array.isArray(petsDirs) ? petsDirs : [petsDirs];
 
-  try {
-    for (const entry of fs.readdirSync(petsDir, { withFileTypes: true })) {
-      if (!entry.isDirectory()) {
-        continue;
+  for (const petsDir of dirs) {
+    try {
+      for (const entry of fs.readdirSync(petsDir, { withFileTypes: true })) {
+        if (!entry.isDirectory()) {
+          continue;
+        }
+
+        const folderPath = path.join(petsDir, entry.name);
+        const manifestPath = path.join(folderPath, "pet.json");
+        if (!fs.existsSync(manifestPath)) {
+          continue;
+        }
+
+        const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown;
+        if (!isPetManifest(parsed)) {
+          continue;
+        }
+
+        const spritesheetPath = path.resolve(folderPath, parsed.spritesheetPath);
+        if (!isPathInside(folderPath, spritesheetPath) || !fs.existsSync(spritesheetPath)) {
+          continue;
+        }
+
+        const id = parsed.id || entry.name;
+        if (seenIds.has(id)) {
+          continue;
+        }
+
+        seenIds.add(id);
+        assetMap.set(id, spritesheetPath);
+        discovered.push({
+          id,
+          displayName: parsed.displayName,
+          description: parsed.description,
+          spritesheetUrl: `pet-asset://${encodeURIComponent(id)}`,
+          isBuiltIn: false,
+        });
       }
-
-      const folderPath = path.join(petsDir, entry.name);
-      const manifestPath = path.join(folderPath, "pet.json");
-      if (!fs.existsSync(manifestPath)) {
-        continue;
-      }
-
-      const parsed = JSON.parse(fs.readFileSync(manifestPath, "utf8")) as unknown;
-      if (!isPetManifest(parsed)) {
-        continue;
-      }
-
-      const spritesheetPath = path.resolve(folderPath, parsed.spritesheetPath);
-      if (!isPathInside(folderPath, spritesheetPath) || !fs.existsSync(spritesheetPath)) {
-        continue;
-      }
-
-      const id = parsed.id || entry.name;
-      assetMap.set(id, spritesheetPath);
-      discovered.push({
-        id,
-        displayName: parsed.displayName,
-        description: parsed.description,
-        spritesheetUrl: `pet-asset://${encodeURIComponent(id)}`,
-        isBuiltIn: false,
-      });
+    } catch {
+      continue;
     }
-  } catch {
-    return { pets: [builtInPet], assetMap };
   }
 
   discovered.sort((a, b) => a.displayName.localeCompare(b.displayName));

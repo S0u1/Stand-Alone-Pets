@@ -15,6 +15,7 @@ Stand_Alone_Pets is an independent desktop pet app built with Electron, React, V
 - OpenAI-compatible API settings: base URL, model, API key, and system prompt
 - Automatic prompt injection with the selected pet's name and description
 - Local pet pack discovery from `~/.codex/pets`
+- Bundled 1/1 WGG pet collection
 - Drag animation states for moving the pet
 - Click-through and always-on-top settings
 - Debug logging for LLM request parameters, stream chunks, and final responses
@@ -123,13 +124,14 @@ Each pet should live in its own folder with a `pet.json` manifest:
 }
 ```
 
-The spritesheet is expected to follow the Codex pet atlas layout used by this app: 8 columns by 9 rows. If no local pet pack is available, the app falls back to the built-in Spark pet.
+The spritesheet is expected to follow the Codex pet atlas layout used by this app: 8 columns by 9 rows. The repository also includes bundled WGG pet packs under `pets/`, which are included in packaged releases. If no local or bundled pet pack is available, the app falls back to the built-in Spark pet.
 
 ## Project Structure
 
 ```text
 assets/              App icon assets
 electron/            Electron main process, preload bridge, config, pets, LLM calls
+pets/                Bundled WGG pet packs
 src/                 React renderer UI and pet animation logic
 tests/               Unit tests
 ```

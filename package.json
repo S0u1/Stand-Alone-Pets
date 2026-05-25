@@ -1,7 +1,7 @@
 {
   "name": "stand_alone_pets",
   "productName": "Stand_Alone_Pets",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "main": "dist-electron/main.js",
   "scripts": {
@@ -48,6 +48,7 @@
       "dist/**/*",
       "dist-electron/**/*",
       "assets/**/*",
+      "pets/**/*",
       "package.json"
     ],
     "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",

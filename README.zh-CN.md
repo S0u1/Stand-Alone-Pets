@@ -15,6 +15,7 @@ Stand_Alone_Pets 是一个独立桌面宠物应用，基于 Electron、React、V
 - OpenAI 兼容 API 配置：Base URL、模型、API Key、系统 Prompt
 - 自动把当前宠物的名字和描述注入到 Prompt
 - 从 `~/.codex/pets` 自动发现本地宠物素材包
+- 内置一批 1/1 WGG 宠物素材
 - 拖动桌宠时触发移动动画状态
 - 支持点击穿透和窗口置顶
 - 调试日志会打印大模型请求参数、流式分片和最终返回
@@ -123,13 +124,14 @@ ${CODEX_HOME:-~/.codex}/pets
 }
 ```
 
-精灵图需要符合当前应用使用的 Codex 桌宠图集格式：8 列、9 行。如果没有发现本地宠物素材包，应用会使用内置的 Spark 宠物。
+精灵图需要符合当前应用使用的 Codex 桌宠图集格式：8 列、9 行。仓库的 `pets/` 目录也内置了一批 WGG 宠物素材，打包发布时会一起带上。如果没有发现本地或内置宠物素材包，应用会使用内置的 Spark 宠物。
 
 ## 项目结构
 
 ```text
 assets/              应用图标资源
 electron/            Electron 主进程、preload 桥接、配置、宠物发现和 LLM 调用
+pets/                内置 WGG 宠物素材包
 src/                 React 渲染进程 UI 和宠物动画逻辑
 tests/               单元测试
 ```

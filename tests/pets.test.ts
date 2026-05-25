@@ -64,4 +64,34 @@ describe("pet discovery", () => {
     expect(registry.pets.some((pet) => pet.id === "cat")).toBe(false);
     expect(registry.assetMap.has("cat")).toBe(false);
   });
+
+  it("can merge multiple pet directories without duplicate ids", () => {
+    const firstDir = createTempPetsDir();
+    const secondDir = createTempPetsDir();
+    const firstPetDir = path.join(firstDir, "ghost");
+    const secondPetDir = path.join(secondDir, "ghost");
+    fs.mkdirSync(firstPetDir, { recursive: true });
+    fs.mkdirSync(secondPetDir, { recursive: true });
+    fs.writeFileSync(path.join(firstPetDir, "spritesheet.png"), "first");
+    fs.writeFileSync(path.join(secondPetDir, "spritesheet.png"), "second");
+    writeManifest(firstDir, "ghost", {
+      id: "ghost",
+      displayName: "First Ghost",
+      description: "Loaded first.",
+      spritesheetPath: "spritesheet.png",
+    });
+    writeManifest(secondDir, "ghost", {
+      id: "ghost",
+      displayName: "Second Ghost",
+      description: "Skipped as duplicate.",
+      spritesheetPath: "spritesheet.png",
+    });
+
+    const registry = discoverPets([firstDir, secondDir]);
+
+    expect(registry.pets.filter((pet) => pet.id === "ghost")).toHaveLength(1);
+    expect(registry.pets.find((pet) => pet.id === "ghost")?.displayName).toBe(
+      "First Ghost",
+    );
+  });
 });
