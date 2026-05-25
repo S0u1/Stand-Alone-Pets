@@ -9,6 +9,9 @@
     "dev:electron": "wait-on http://127.0.0.1:5173 && npm run build:electron && ELECTRON_RENDERER_URL=http://127.0.0.1:5173 electron .",
     "build": "npm run typecheck && vite build && npm run build:electron",
     "build:electron": "tsc -p tsconfig.electron.json",
+    "dist": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac dmg zip",
+    "dist:win": "npm run build && electron-builder --win nsis zip",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit"
@@ -25,9 +28,59 @@
     "@types/react-dom": "^19.1.9",
     "concurrently": "^9.2.1",
     "electron": "^38.1.2",
+    "electron-builder": "^26.8.1",
+    "png-to-ico": "^3.0.1",
     "typescript": "^5.9.2",
     "vite": "^6.3.6",
     "vitest": "^3.2.4",
     "wait-on": "^8.0.4"
+  },
+  "build": {
+    "appId": "com.s0u1.standalonepets",
+    "productName": "Stand_Alone_Pets",
+    "asar": true,
+    "npmRebuild": false,
+    "directories": {
+      "buildResources": "build",
+      "output": "releases"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "assets/**/*",
+      "package.json"
+    ],
+    "artifactName": "${productName}-${version}-${os}-${arch}.${ext}",
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.icns",
+      "category": "public.app-category.entertainment",
+      "identity": "-"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }

@@ -60,6 +60,31 @@ Build the renderer and Electron main process:
 npm run build
 ```
 
+Build installable desktop packages locally:
+
+```bash
+npm run dist:mac
+npm run dist:win
+```
+
+Packaged files are written to `releases/`.
+
+## GitHub Releases
+
+This repository includes a GitHub Actions release workflow. Push a version tag to build macOS and Windows packages and upload them to GitHub Releases:
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The workflow builds:
+
+- macOS `.dmg` and `.zip`
+- Windows `.exe` installer and `.zip`
+
+macOS packages are ad-hoc signed by default. They are not notarized unless Apple Developer ID signing and notarization secrets are added to the release workflow, so first launch may require right-clicking the app and choosing Open.
+
 ## LLM Configuration
 
 Open the app settings from the pet's right-click menu and configure:
