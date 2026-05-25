@@ -70,6 +70,8 @@ npm run dist:win
 
 Packaged files are written to `releases/`.
 
+On Windows, use the `portable.exe` or unzip the Windows `.zip` package to run the app without an installer.
+
 ## GitHub Releases
 
 This repository includes a GitHub Actions release workflow. Push a version tag to build macOS and Windows packages and upload them to GitHub Releases:
@@ -82,7 +84,7 @@ git push origin v0.1.0
 The workflow builds:
 
 - macOS `.dmg` and `.zip`
-- Windows `.exe` installer and `.zip`
+- Windows portable `.exe` and `.zip`
 
 macOS packages are ad-hoc signed by default. They are not notarized unless Apple Developer ID signing and notarization secrets are added to the release workflow, so first launch may require right-clicking the app and choosing Open.
 

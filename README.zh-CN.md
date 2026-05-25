@@ -70,6 +70,8 @@ npm run dist:win
 
 打包产物会输出到 `releases/` 目录。
 
+Windows 用户可以直接下载 `portable.exe`，或解压 Windows `.zip` 后直接运行，不需要安装。
+
 ## GitHub Releases
 
 项目已经包含 GitHub Actions 发布流程。推送版本 tag 后，会自动构建 macOS 和 Windows 安装包，并上传到 GitHub Releases：
@@ -82,7 +84,7 @@ git push origin v0.1.0
 工作流会生成：
 
 - macOS `.dmg` 和 `.zip`
-- Windows `.exe` 安装包和 `.zip`
+- Windows 便携版 `.exe` 和 `.zip`
 
 macOS 包默认使用 ad-hoc 签名。除非后续在发布流程里配置 Apple Developer ID 签名和公证密钥，否则它不是 notarized 包，首次打开时可能需要右键选择 Open，或在系统设置里允许打开。
 

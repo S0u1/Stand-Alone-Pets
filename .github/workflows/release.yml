@@ -79,6 +79,6 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            releases/*.exe
+            releases/*portable.exe
             releases/*.zip
           fail_on_unmatched_files: true
