@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-electron/
+.DS_Store
+.superpowers/
+docs/superpowers/
+npm-debug.log*
+*.log
