@@ -2,6 +2,8 @@
 
 <img src="assets/stand-alone-pets-icon.png" alt="Stand_Alone_Pets icon" width="96" />
 
+[中文版 README](README.zh-CN.md)
+
 Stand_Alone_Pets is an independent desktop pet app built with Electron, React, Vite, and TypeScript. It floats above the desktop, supports local pet sprite packs, and can connect to OpenAI-compatible chat completion APIs so each pet can reply through an on-screen speech bubble.
 
 ## Features
